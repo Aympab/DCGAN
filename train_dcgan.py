@@ -22,7 +22,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 ## Data set parameters
 ds = "data/lhq_256"
 run_test = False
-bs = 256
+bs = 64
 rescale_size=280
 crop_size=256
 
