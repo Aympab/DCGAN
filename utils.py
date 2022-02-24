@@ -59,14 +59,32 @@ def apply_weight_decay(*modules, weight_decay_factor=0., wo_bn=True):
 
 def write_params(p, folder='saved_models', verbose=0):
     filename = p['filename']
-    string = f"Name : {p['filename']}\n########### GLOBAL ###########\nDS: {p['ds']}\nRun test : {p['run_test']}\nBatch size : {p['bs']}\nCrop_size : {p['crop_size']}\n\n"
-    string += f"########### ARCHI ###########\nInput dim : {p['z_dim']}\n{p['archi_info']}\n\n"
-    string += "########### TRAINING PARAMS ###########\n"
-    string += f"Epochs : {p['n_epoch']}\nSave freq : {p['save_frequency']}\nDiscriminator learning factor (k) : {p['k']}\n\n"
-    string += f"########### MODEL PARAMS ###########\nlrG : {p['lrG']}\nlrD : {p['lrD']}\nbeta : {p['beta1']}\nWeight decay Discriminator : {p['weight_decayD']}\nWeight decay Generator : {p['weight_decayG']}\n"
-    string += f"label_reals : {p['label_reals']}\nlabel_fakes :{p['label_fakes']}\n\n"
-    string += f"########### LAST EPOCH ###########\n"
-    string += f"Last epoch : {p['epoch']}"
+
+    string = f"""Name : {p['filename']}
+Last epoch : {p['epoch']}
+########### GLOBAL ###########
+DS: {p['ds']}
+Run test : {p['run_test']}
+Batch size : {p['bs']}
+Crop_size : {p['crop_size']}\n\n"""
+
+    string += f"""########### ARCHI ###########
+Input dim : {p['z_dim']}
+{p['archi_info']}\n\n"""
+
+    string += f"""########### TRAINING PARAMS ###########\n
+Epochs : {p['n_epoch']}
+Save freq : {p['save_frequency']}
+Discriminator learning factor (k) : {p['k']}\n\n"""
+
+    string += f"""########### MODEL PARAMS ###########
+lrG : {p['lrG']}
+lrD : {p['lrD']}
+beta : {p['beta1']}
+Weight decay Discriminator : {p['weight_decayD']}
+Weight decay Generator : {p['weight_decayG']}
+label_reals : {p['label_reals']}
+label_fakes :{p['label_fakes']}"""
 
     if verbose:
         print(string)
@@ -77,7 +95,6 @@ def write_params(p, folder='saved_models', verbose=0):
     with open(os.path.join(folder, filename), 'w+') as file :
         file.write(string)
         file.close()
-
 
 def get_epoch_from_log(param_dict, folder='saved_models', verbose=1):
     with open(os.path.join(folder, param_dict["filename"] + "-PARAMS"), "r") as f:

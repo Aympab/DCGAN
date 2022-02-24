@@ -100,9 +100,9 @@ class ResUpConvBlock(nn.Module):
             raise ValueError(f"Wrong value of stride : {stride}, should be int")
         if (stride != 1):
             if (padding != 0) and (out_size is not None):
-                self.skip1 = nn.Upsample(size=out_size, mode="nearest")#, align_corners=True)
+                self.skip1 = nn.Upsample(size=out_size, mode="bilinear", align_corners=True)
             else:
-                self.skip1 = nn.Upsample(scale_factor=stride, mode="nearest")#, align_corners=True)
+                self.skip1 = nn.Upsample(scale_factor=stride, mode="bilinear", align_corners=True)
         if (in_channels != out_channels):
             self.skip2 = nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1)
 
@@ -118,9 +118,9 @@ class ResUpConvBlock(nn.Module):
           
         if (stride != 1):
             if (padding != 0) and (out_size is not None):
-                uplayer = nn.Upsample(size=out_size, mode="nearest")#, align_corners=True)
+                uplayer = nn.Upsample(size=out_size, mode="bilinear", align_corners=True)
             else:
-                uplayer = nn.Upsample(scale_factor=stride, mode="nearest")#, align_corners=True)
+                uplayer = nn.Upsample(scale_factor=stride, mode="bilinear", align_corners=True)
 
 
             layers_block = [nn.Conv2d(in_channels, in_channels, kernel_size=3,  

@@ -20,7 +20,7 @@ import argparse
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 ## Data set parameters
-ds = "data/lhq_256"
+ds = "data/berry"
 run_test = False
 bs = 64
 rescale_size=280
@@ -34,7 +34,7 @@ train_loader, test_loader = define_loaders(bs_train=bs, bs_test=bs,
 
 
 #Architecture information, only to be printed in params file
-archi_info = "upsamble type : nearest"
+archi_info = "upsamble type : bilinear"
 
 #Optimizer parameters
 lrG = 0.00001
@@ -137,8 +137,8 @@ def D_train(x):
         D_fake_loss = criterion(D_output, labels)
         D_fake_acc = accuracy(D_output, labels)
 
-    D_fake_loss.backward()
     # gradient backprop & optimize ONLY D's parameters
+    D_fake_loss.backward()
     full_loss = D_real_loss + D_fake_loss
     #full_loss.backward()
 
@@ -174,14 +174,33 @@ def G_train(x):
 
 
 if __name__ == "__main__":
-    
+    ############################################################################
+    ############################################################################
+    ############################ ARGUMENT PARSING ##############################
+    ############################################################################
+    ############################################################################
     parser = argparse.ArgumentParser(description='Process options')
     parser.add_argument('--resume', action="store_true",
                         help='Wether or not to continue training')
     parser.add_argument('--midsave', action="store_true",
                         help='Save model evolution (every 20 epochs by default)')
+    parser.add_argument('-name', help='Saved filename of the model')
 
     args = parser.parse_args()
+
+    if args.name == None:
+        raise Exception("Argument '-name' is required")
+    else :
+        savefile = args.name
+
+
+    param_dict = {"filename": savefile, "archi_info" : archi_info,
+              "lrG": lrG, "lrD": lrD, "beta1": beta1,
+              "weight_decayD":weight_decayD, "weight_decayG":weight_decayG,
+              "z_dim": z_dim, "n_epoch": n_epoch,
+              "save_frequency": save_frequency, "k": k,
+              "label_fakes": label_fakes, "label_reals": label_reals, "ds": ds, 
+            "run_test": run_test, "bs": bs, "crop_size": crop_size, "epoch": 0}
 
     D_losses, G_losses = [0], [0]
     D_accs, G_accs = [0], [0]
@@ -208,8 +227,13 @@ if __name__ == "__main__":
         G_losses = losses["generator"].values.tolist()
         D_accs = acc["discriminator"].values.tolist()
         G_accs = acc["generator"].values.tolist()
-    
 
+
+    ############################################################################
+    ############################################################################
+    ################################ TRAINING ##################################
+    ############################################################################
+    ############################################################################
     print(f'Launching for {n_epoch} epochs...\nSave frequency = {save_frequency}')
     print(f"Number of parameters : D : {get_n_params(D)}, G : {get_n_params(G)}")
 
@@ -234,14 +258,22 @@ if __name__ == "__main__":
 
 
         print('[%d/%d]: loss_d: %.3f, loss_g: %.3f' % (
-                (epoch), n_epoch, np.mean(D_losses[-10:]), np.mean(G_losses[-10:])))
+                (epoch), n_epoch,
+                np.mean(D_losses[-10:]),
+                np.mean(G_losses[-10:])))
 
+        ########################################################################
+        ##############################   SAVING   ##############################
+        ########################################################################
         with torch.no_grad():
             test_z = torch.randn(n_generated_save, z_dim).to(device)
             generated = G(test_z)
 
             if(epoch % save_frequency == 0):
-                save_image(make_grid(generated.view(generated.size(0), 3, crop_size, crop_size), nrow=3), './generated_batchs_lhq128/generated_batch' + str(epoch) + '.png')
+                save_image(
+                    make_grid(generated.view(generated.size(0), 3,
+                                            crop_size, crop_size), nrow=3),
+                    './generated_batchs/generated_batch' + str(epoch) + '.png')
             
             if(run_test):
                 D_test_acc = 0
@@ -281,5 +313,6 @@ if __name__ == "__main__":
             torch.save(G.state_dict(), f"saved_models/{savefile}_generator_epoch{epoch}.sav")
             torch.save(D.state_dict(), f"saved_models/{savefile}_discriminator_epoch{epoch}.sav")
 
-        
-
+    #########################   END TRAINING LOOP   ########################
+    ########################################################################
+    ########################################################################
