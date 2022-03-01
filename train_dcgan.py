@@ -20,7 +20,7 @@ import argparse
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 ## Data set parameters
-ds = "data/berry"
+ds = "data/lhq_256"
 run_test = False
 bs = 64
 rescale_size=280
@@ -47,7 +47,7 @@ weight_decayD = 0.001
 z_dim = 256
 
 #Training parameters
-savefile = 'res-gan-2'
+savefile = 'res-gan-landscapes'
 n_epoch = 5000
 save_frequency = 5
 k = 1 #Facteur d'apprentissage discriminateur
